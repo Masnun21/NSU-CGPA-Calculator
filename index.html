@@ -133,6 +133,47 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
   .topbar,.btns,.x,.toast,footer,.save-row,.sheets,.piectl{display:none!important}
   body{background:#fff}.wrap{display:block}.card{box-shadow:none;break-inside:avoid;margin-bottom:12px}.side{position:static}
 }
+@page{margin:12mm}
+#report{display:none;--bg:#fff;--card:#fff;--ink:#0a0a0a;--muted:#5a6661;--line:#dde4e0;--field:#f5f8f6;--accent:#006a4e;--accent-text:#006a4e;--accent-soft:#e2f1eb;--warn:#9a5b00;--bad:#b42318;color:#0a0a0a;background:#fff;font:12px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+#report,#report *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#report svg{display:block;max-width:100%}
+.rp-head{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#000;color:#fff;border-bottom:3px solid #00d27a;border-radius:10px;padding:12px 16px}
+.rp-brand{display:flex;align-items:center;gap:10px}.rp-brand b{font-size:17px;display:block}.rp-brand small,.rp-meta small{display:block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#9db3aa}
+.rp-logo{width:32px;height:32px;border-radius:8px;background:#00a86b;display:grid;place-items:center;font-weight:800;font-size:13px}
+.rp-meta{text-align:right}.rp-meta b{font-size:14px;display:block}
+.rp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.rp-card{border:1px solid #dde4e0;border-radius:12px;padding:12px 14px;break-inside:avoid;margin-top:12px}
+.rp-grid .rp-card{margin-top:0}
+.rp-card.rp-flow{break-inside:auto}
+.rp-card h2{margin:0 0 8px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#5a6661}
+.rp-gauge{display:grid;place-items:center;margin:2px 0 10px}
+.rp-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rp-stat{background:#f5f8f6;border-radius:8px;padding:6px 9px}.rp-stat b{display:block;font-size:15px}.rp-stat span{font-size:10px;color:#5a6661}
+.rp-tiers{display:grid;gap:5px;margin-top:6px}
+.rp-tier{display:flex;justify-content:space-between;gap:8px;border:1px solid #dde4e0;border-radius:8px;padding:5px 9px;font-size:11px;background:#f5f8f6}
+.rp-tier.on{border-color:#006a4e;background:#e2f1eb;font-weight:700}
+.rp-sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px}
+.rp-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.rp-pie{display:flex;align-items:center;gap:14px}
+.rp-note{margin:8px 0 0;font-size:10.5px;color:#5a6661}
+.rp-line{margin:0 0 6px;font-size:12px}
+.rp-empty{color:#5a6661;font-size:11.5px;padding:4px 0}
+.rp-out{padding:8px 10px;border-radius:8px;background:#e2f1eb;font-size:12px;margin-top:4px}
+.rp-t{width:100%;border-collapse:collapse;font-size:11px}
+.rp-t th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:#5a6661;border-bottom:1.5px solid #cfd8d3;padding:4px 6px}
+.rp-t td{padding:4px 6px;border-bottom:1px solid #edf1ef}
+.rp-t tr{break-inside:avoid}.rp-t .num{text-align:right}
+.rp-t tr.mut td{color:#8a9791}.rp-t tr.warn td{color:#9a5b00}
+.rp-lg{width:auto;flex:1}.rp-lg td{border:0;padding:2px 5px;font-size:11.5px}
+.rp-sem{margin-top:12px}.rp-sem:first-of-type{margin-top:0}
+.rp-sem h3{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font-size:13px;border-left:4px solid #00a86b;padding-left:8px;break-after:avoid}
+.rp-sem h3 small{font-size:10.5px;font-weight:400;color:#5a6661}
+.rp-break{break-after:page;height:0}
+.rp-foot{margin:14px 0 0;font-size:9.5px;color:#5a6661;text-align:center}
+#report .pd h3{font-size:12px;margin:12px 0 5px}#report .pd p{margin:0 0 6px;font-size:11.5px}
+#report .pl{display:grid;gap:4px}#report .pr{font-size:11px;padding:5px 8px}
+#report .wi{grid-template-columns:repeat(7,1fr);gap:5px}
+@media print{body.rpt .topbar,body.rpt .wrap,body.rpt footer,body.rpt .toast{display:none!important}body.rpt #report{display:block}body.rpt{background:#fff;min-height:0}}
 </style>
 </head>
 <body>
@@ -167,6 +208,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
         <div class="stat"><b id="gain">+0.00</b><span>Older-record retake gain</span></div>
       </div>
       <div class="btns" style="margin-top:12px">
+        <button class="btn primary" id="pdfBtn">Export PDF</button>
         <button class="btn" id="copySum">Copy summary</button>
         <button class="btn" id="printBtn">Print</button>
       </div>
@@ -262,6 +304,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
   </main>
 </div>
 <footer>Private by design: no account, no server. Sync links keep your data in the part of the URL that is never sent to a server.</footer>
+<div id="report" aria-hidden="true"></div>
 <div class="toast" id="toast"><span id="toastTxt"></span><button id="toastUndo" hidden>Undo</button></div>
 
 <script>
@@ -634,7 +677,176 @@ $("copySum").onclick=()=>{
   s.retakes.filter(c=>!c.off&&c.oldGrade&&c.newGrade).forEach(c=>{t+="- Older-record retake "+(c.name||"Course")+" ("+c.credits+" cr): "+c.oldGrade+" -> "+c.newGrade+"\n";});
   copyText(t.trim()).then(()=>toast("Summary copied"),()=>toast("Copy failed"));
 };
-$("printBtn").onclick=()=>window.print();
+/* ---------- PDF report (print-ready, always light) ---------- */
+const RPC={grey:"#e3e9e6",blue:"#2f7bff",amber:"#ffb020",green:"#00d27a",low:"#9fb3c8"};
+const tierCol=c=>c>=3.8?RPC.green:c>=3.65?RPC.amber:c>=3.5?RPC.blue:RPC.low;
+const trunc=(n,k)=>{n=String(n||"");return n.length>k?n.slice(0,k-1)+"…":n;};
+const dot=g=>'<i class="rp-dot" style="background:'+PIE_EXACT[g]+'"></i>';
+
+function rpGauge(c,has){
+  const C=326.7, off=C-C*Math.min(c/4,1);
+  return '<svg viewBox="0 0 120 120" width="150" height="150" role="img" aria-label="Overall CGPA"><defs><linearGradient id="rpG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00e08a"/><stop offset=".5" stop-color="#14c8e6"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs>'+
+    '<circle cx="60" cy="60" r="52" fill="none" stroke="#e3e9e6" stroke-width="10"/>'+
+    (has?'<circle cx="60" cy="60" r="52" fill="none" stroke="url(#rpG)" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 60 60)"/>':'')+
+    '<text x="60" y="63" text-anchor="middle" font-size="28" font-weight="800" fill="#0a0a0a">'+c.toFixed(2)+'</text>'+
+    '<text x="60" y="77" text-anchor="middle" font-size="7.5" fill="#5a6661">out of 4.00</text>'+
+    (has?'<text x="60" y="87" text-anchor="middle" font-size="7.5" fill="#5a6661">about '+nearestLetter(c)+'</text>':'')+'</svg>';
+}
+function rpHonorBar(c,has){
+  const W=500,x0=10,w=480,cl=Math.min(Math.max(c,3),4),px=x0+w*(cl-3);
+  const segs=[[0,.5,RPC.grey],[.5,.65,RPC.blue],[.65,.8,RPC.amber],[.8,1,RPC.green]];
+  let g='<svg viewBox="0 0 500 68" width="100%" role="img" aria-label="Distinction bar"><defs><clipPath id="rpClip"><rect x="10" y="24" width="480" height="16" rx="8"/></clipPath></defs><g clip-path="url(#rpClip)">'+
+    segs.map(s=>'<rect x="'+(x0+w*s[0]).toFixed(1)+'" y="24" width="'+(w*(s[1]-s[0])).toFixed(1)+'" height="16" fill="'+s[2]+'"/>').join("")+
+    [.5,.65,.8].map(f=>'<rect x="'+(x0+w*f-1).toFixed(1)+'" y="24" width="2" height="16" fill="#fff"/>').join("")+'</g>';
+  if(has){
+    g+='<rect x="'+(px-2).toFixed(1)+'" y="18" width="4" height="28" rx="2" fill="#0a0a0a" stroke="#fff" stroke-width="1.5"/>'+
+      '<text x="'+Math.min(Math.max(px,24),476).toFixed(1)+'" y="12" text-anchor="middle" font-size="11" font-weight="700" fill="#0a0a0a">'+c.toFixed(2)+'</text>';
+  }
+  [[0,"3.00","start"],[.5,"3.50","middle"],[.65,"3.65","middle"],[.8,"3.80","middle"],[1,"4.00","end"]].forEach(l=>{
+    g+='<text x="'+(x0+w*l[0]).toFixed(1)+'" y="60" text-anchor="'+l[2]+'" font-size="10" fill="#5a6661">'+l[1]+'</text>';
+  });
+  return g+'</svg>';
+}
+function rpPie(list){
+  const total=list.length;
+  if(!total)return '<div class="rp-empty">Add courses with grades to see the grade distribution.</div>';
+  const cnt={}; list.forEach(g=>{cnt[g]=(cnt[g]||0)+1;});
+  const items=GRADES.map(x=>x[0]).filter(k=>cnt[k]).map(k=>({k:k,n:cnt[k],col:PIE_EXACT[k]}));
+  let a=-Math.PI/2, paths="";
+  items.forEach(it=>{
+    const ang=it.n/total*2*Math.PI, a1=a+ang;
+    if(items.length===1) paths+='<circle cx="80" cy="80" r="70" fill="'+it.col+'"/>';
+    else{
+      const x0=80+70*Math.cos(a),y0=80+70*Math.sin(a),x1=80+70*Math.cos(a1),y1=80+70*Math.sin(a1);
+      paths+='<path d="M80 80L'+x0.toFixed(2)+' '+y0.toFixed(2)+'A70 70 0 '+(ang>Math.PI?1:0)+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2)+'Z" fill="'+it.col+'" stroke="#fff" stroke-width="2"/>';
+    }
+    a=a1;
+  });
+  const lg=items.map(it=>'<tr><td>'+dot(it.k)+'</td><td><b>'+it.k+'</b></td><td>× '+it.n+(it.n===1?' course':' courses')+'</td><td class="num">'+Math.round(it.n/total*100)+'%</td></tr>').join("");
+  return '<div class="rp-pie"><svg viewBox="0 0 160 160" width="130" height="130" role="img" aria-label="Grade distribution">'+paths+'</svg><table class="rp-t rp-lg">'+lg+'</table></div>'+
+    '<p class="rp-note">'+total+' course'+(total===1?'':'s')+' counted. Retaken courses count once, with the better grade.</p>';
+}
+function rpSemBars(rows){
+  if(!rows.length)return '<div class="rp-empty">Add semesters with graded courses to compare them.</div>';
+  const lw=140,bx=lw+8,bw=260,rh=26,H=rows.length*rh+6;
+  let svg='<svg viewBox="0 0 500 '+H+'" width="100%" role="img" aria-label="GPA by semester">';
+  rows.forEach((x,i)=>{
+    const y=i*rh+3, w=bw*Math.min(x.gpa/4,1);
+    svg+='<text x="'+lw+'" y="'+(y+13)+'" text-anchor="end" font-size="10.5" fill="#0a0a0a">'+esc(trunc(x.name,24))+'</text>'+
+      '<rect x="'+bx+'" y="'+y+'" width="'+bw+'" height="18" rx="5" fill="#eef2f0"/>'+
+      (w>0?'<rect x="'+bx+'" y="'+y+'" width="'+w.toFixed(1)+'" height="18" rx="5" fill="'+tierCol(x.gpa)+'"/>':'')+
+      '<text x="'+(bx+bw+8)+'" y="'+(y+13)+'" font-size="10.5"><tspan font-weight="700" fill="#0a0a0a">'+x.gpa.toFixed(2)+'</tspan><tspan font-size="9" fill="#5a6661"> · '+r2(x.cr)+' cr</tspan></text>';
+  });
+  return svg+'</svg><p class="rp-note">Bar colors follow the distinction tiers: blue 3.50+, amber 3.65+, green 3.80+.</p>';
+}
+function rpLine(labels,vals,tiers){
+  const n=vals.length; if(n<2)return '';
+  const W=500,H=190,pl=34,pr=60,pt=22,pb=n>6?46:34;
+  const lo=Math.min.apply(null,vals), min=Math.max(0,Math.floor((lo-0.2)*2)/2), max=4;
+  const X=i=>pl+(W-pl-pr)*(i/(n-1)), Y=v=>H-pb-(H-pt-pb)*((v-min)/(max-min));
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="CGPA over time">';
+  [min,(min+max)/2,max].forEach(t=>{svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(t).toFixed(1)+'" y2="'+Y(t).toFixed(1)+'" stroke="#e3e9e6"/><text x="'+(pl-5)+'" y="'+(Y(t)+3).toFixed(1)+'" text-anchor="end" font-size="9" fill="#5a6661">'+t.toFixed(1)+'</text>';});
+  if(tiers)[[3.5,RPC.blue,"#1d5fd6","Cum 3.50"],[3.65,RPC.amber,"#b86e00","Magna 3.65"],[3.8,RPC.green,"#00945a","Summa 3.80"]].forEach(t=>{
+    if(t[0]>min&&t[0]<max) svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(t[0]).toFixed(1)+'" y2="'+Y(t[0]).toFixed(1)+'" stroke="'+t[1]+'" stroke-dasharray="4 3"/><text x="'+(W-pr+4)+'" y="'+(Y(t[0])+3).toFixed(1)+'" font-size="8" fill="'+t[2]+'">'+t[3]+'</text>';
+  });
+  const pts=vals.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ");
+  svg+='<polygon points="'+X(0).toFixed(1)+','+(H-pb)+' '+pts+' '+X(n-1).toFixed(1)+','+(H-pb)+'" fill="rgba(47,123,255,.10)"/>'+
+    '<polyline fill="none" stroke="#2f7bff" stroke-width="2.5" stroke-linejoin="round" points="'+pts+'"/>';
+  vals.forEach((v,i)=>{
+    svg+='<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(v).toFixed(1)+'" r="3.5" fill="#2f7bff" stroke="#fff" stroke-width="1.5"/>';
+    if(n<=12) svg+='<text x="'+X(i).toFixed(1)+'" y="'+(Y(v)-8).toFixed(1)+'" text-anchor="middle" font-size="9" font-weight="700" fill="#0a0a0a">'+v.toFixed(2)+'</text>';
+    const lx=X(i).toFixed(1), ly=H-pb+14, t=esc(trunc(labels[i],n>6?12:14));
+    svg+=n>6?'<text x="'+lx+'" y="'+ly+'" text-anchor="end" font-size="8.5" fill="#5a6661" transform="rotate(-30 '+lx+' '+ly+')">'+t+'</text>'
+            :'<text x="'+lx+'" y="'+ly+'" text-anchor="middle" font-size="8.5" fill="#5a6661">'+t+'</text>';
+  });
+  return svg+'</svg>';
+}
+function rpSemTable(sem,r){
+  const st=semStat(sem);
+  const rows=sem.courses.filter(c=>c.name||c.grade||c.credits!=="").map(c=>{
+    const cr=num(c.credits), has=GP.hasOwnProperty(c.grade);
+    let note="Counted", cls="";
+    if(c.off){note="Excluded";cls="mut";}
+    else if(!has){note="No grade";cls="mut";}
+    else if(cr<=0){note="No credits";cls="mut";}
+    else if(r.superseded.has(c.id)){note="Not counted (retaken, better grade used)";cls="warn";}
+    const live=has&&cr>0&&!c.off;
+    return '<tr class="'+cls+'"><td>'+esc(c.name||"Course")+'</td><td class="num">'+(c.credits!==""?esc(c.credits):"–")+'</td><td>'+(has?dot(c.grade)+'<b>'+c.grade+'</b>':"–")+'</td><td class="num">'+(has?GP[c.grade].toFixed(2):"–")+'</td><td class="num">'+(live?(cr*GP[c.grade]).toFixed(2):"–")+'</td><td>'+note+'</td></tr>';
+  }).join("");
+  return '<div class="rp-sem"><h3><span>'+esc(sem.name||"Semester")+'</span><small>GPA '+st.gpa.toFixed(2)+' · '+r2(st.cr)+' credits</small></h3>'+
+    (rows?'<table class="rp-t"><thead><tr><th>Course</th><th class="num">Credits</th><th>Grade</th><th class="num">Points</th><th class="num">Cr × Pts</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="rp-empty">No courses in this semester.</div>')+'</div>';
+}
+function buildReport(s,r){
+  const c=r2(r.cgpa), has=r.totCr>0;
+  const dateStr=new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  const tier=has?(c>=3.8?3:c>=3.65?2:c>=3.5?1:0):0;
+  const tierRows=[[3,"Summa Cum Laude","3.80 – 4.00",RPC.green],[2,"Magna Cum Laude","3.65 – 3.79",RPC.amber],[1,"Cum Laude","3.50 – 3.64",RPC.blue]]
+    .map(t=>'<div class="rp-tier'+(tier===t[0]?' on':'')+'"><span><i class="rp-sw" style="background:'+t[3]+'"></i>'+t[1]+'</span><span>'+t[2]+'</span></div>').join("");
+  const semRows=s.semesters.map(m=>{const st=semStat(m);return {name:m.name||"Semester",gpa:st.gpa,cr:st.cr};}).filter(x=>x.cr>0);
+  /* CGPA after each semester (earlier record first, if entered) */
+  const labels=[], vals=[];
+  if(num(s.prevCredits)>0&&num(s.prevCgpa)>0){labels.push("Earlier record");vals.push(Math.min(num(s.prevCgpa),4));}
+  s.semesters.forEach((m,i)=>{
+    if(semStat(m).cr<=0)return;
+    labels.push(m.name||"Semester"); vals.push(analyze(Object.assign({},s,{semesters:s.semesters.slice(0,i+1)})).cgpa);
+  });
+  const prog=vals.length>=2?'<div class="rp-card rp-full"><h2>CGPA after each semester</h2>'+rpLine(labels,vals,true)+'<p class="rp-note">Retakes within semesters are applied as they appear; the last point is your overall CGPA.</p></div>':'';
+
+  let h='<div class="rp-head"><div class="rp-brand"><span class="rp-logo">GA</span><div><b>Grade Analyzer</b><small>CGPA report</small></div></div><div class="rp-meta"><b>'+esc(s.name)+'</b><small>'+esc(dateStr)+'</small></div></div>';
+  h+='<div class="rp-grid">'+
+    '<div class="rp-card"><h2>Overall CGPA</h2><div class="rp-gauge">'+rpGauge(r.cgpa,has)+'</div><div class="rp-stats">'+
+      '<div class="rp-stat"><b>'+r.gpa.toFixed(2)+'</b><span>GPA of entered courses</span></div>'+
+      '<div class="rp-stat"><b>'+r2(r.totCr)+'</b><span>Total credits</span></div>'+
+      '<div class="rp-stat"><b>'+r.totPts.toFixed(2)+'</b><span>Grade points</span></div>'+
+      '<div class="rp-stat"><b>+'+r.gain.toFixed(2)+'</b><span>Older-record retake gain</span></div></div></div>'+
+    '<div class="rp-card"><h2>Distinction</h2>'+rpHonorBar(c,has)+'<div class="rp-tiers">'+tierRows+'</div><p class="rp-note">'+esc($("honMsg").textContent)+'</p></div>'+
+    '<div class="rp-card"><h2>Grade distribution</h2>'+rpPie(r.counted.map(a=>a.c.grade))+'</div>'+
+    '<div class="rp-card"><h2>GPA by semester</h2>'+rpSemBars(semRows)+'</div>'+
+  '</div>'+prog;
+
+  /* details */
+  h+='<div class="rp-break"></div>';
+  if(num(s.prevCredits)>0||num(s.prevCgpa)>0) h+='<div class="rp-card"><h2>Your record so far</h2><p class="rp-line"><b>'+r2(num(s.prevCredits))+'</b> credits at a CGPA of <b>'+Math.min(num(s.prevCgpa),4).toFixed(2)+'</b> before the semesters below.</p></div>';
+  h+='<div class="rp-card rp-flow"><h2>Semesters &amp; courses</h2>'+(s.semesters.length?s.semesters.map(m=>rpSemTable(m,r)).join(""):'<div class="rp-empty">No semesters entered.</div>')+'</div>';
+
+  const rts=s.retakes.filter(t=>t.name||t.oldGrade||t.newGrade);
+  if(rts.length){
+    h+='<div class="rp-card"><h2>Retakes from your older record</h2><table class="rp-t"><thead><tr><th>Course</th><th class="num">Credits</th><th>Old</th><th>New</th><th>Effect</th></tr></thead><tbody>'+rts.map(t=>{
+      const ok=GP.hasOwnProperty(t.oldGrade)&&GP.hasOwnProperty(t.newGrade), d=ok?GP[t.newGrade]-GP[t.oldGrade]:0;
+      const eff=t.off?"Excluded":!ok?"Incomplete":d>0?"+"+(d*num(t.credits)).toFixed(2)+" grade points":"No gain (new grade not higher)";
+      return '<tr class="'+(t.off||!ok?'mut':'')+'"><td>'+esc(t.name||"Course")+'</td><td class="num">'+esc(t.credits||"–")+'</td><td>'+(t.oldGrade?dot(t.oldGrade)+t.oldGrade:"–")+'</td><td>'+(t.newGrade?dot(t.newGrade)+t.newGrade:"–")+'</td><td>'+eff+'</td></tr>';
+    }).join("")+'</tbody></table></div>';
+  }
+
+  const tg=targetValue(s), tc=num(s.tc);
+  h+='<div class="rp-card"><h2>Target planner</h2>';
+  if(isFinite(tg)) h+='<p class="rp-line"><b>Target:</b> '+(s.tier==="custom"?tg.toFixed(2)+' CGPA':esc(TIERS[s.tier][0])+' ('+tg.toFixed(2)+')')+(tc>0?' · planning <b>'+tc+'</b> more credits':'')+'</p>';
+  h+='<div class="rp-out">'+esc($("planOut").textContent)+'</div>';
+  if($("whatIf").innerHTML) h+='<p class="rp-note">'+esc($("wiHead").textContent)+'</p><div class="wi">'+$("whatIf").innerHTML+'</div>';
+  if($("planDetail").innerHTML) h+='<div class="pd">'+$("planDetail").innerHTML+'</div>';
+  h+='</div>';
+
+  if(state.saved.length){
+    const sv=state.saved.slice(-12);
+    h+='<div class="rp-card"><h2>Saved calculations</h2>'+(state.saved.length>=2?rpLine(state.saved.map(x=>x.name),state.saved.map(x=>x.cgpa),true):'')+
+      '<table class="rp-t"><thead><tr><th>Name</th><th class="num">CGPA</th><th class="num">Credits</th><th>Date</th></tr></thead><tbody>'+
+      sv.map(x=>'<tr><td>'+esc(x.name)+'</td><td class="num"><b>'+x.cgpa.toFixed(2)+'</b></td><td class="num">'+x.credits+'</td><td>'+esc(x.date)+'</td></tr>').join("")+'</tbody></table></div>';
+  }
+  h+='<p class="rp-foot">Generated by Grade Analyzer on '+esc(dateStr)+'. Grade scale: A 4.00 · A- 3.70 · B+ 3.30 · B 3.00 · B- 2.70 · C+ 2.30 · C 2.00 · C- 1.70 · D+ 1.30 · D 1.00 · F 0.00. Check your university\'s own rules for official distinction eligibility.</p>';
+  return h;
+}
+function exportPdf(){
+  const s=sheet(), r=analyze(s), old=document.title;
+  $("report").innerHTML=buildReport(s,r);
+  document.title=("Grade-Analyzer-"+s.name).replace(/[^\w-]+/g,"-").replace(/-+/g,"-").replace(/^-|-$/g,"")+"-CGPA-"+r.cgpa.toFixed(2);
+  document.body.classList.add("rpt");
+  const done=()=>{document.body.classList.remove("rpt");document.title=old;window.removeEventListener("afterprint",done);};
+  window.addEventListener("afterprint",done);
+  setTimeout(()=>window.print(),80);
+}
+
+$("pdfBtn").onclick=exportPdf;
+$("printBtn").onclick=()=>{document.body.classList.remove("rpt");window.print();};
 
 /* backup / sync */
 $("exportBtn").onclick=()=>{
