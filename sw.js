@@ -1,5 +1,5 @@
 // Network-first service worker: always tries the latest files, falls back to cache when offline.
-const CACHE = "grade-analyzer-v7";
+const CACHE = "grade-analyzer-v8";
 const FILES = ["./", "./index.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", (e) => {
