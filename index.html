@@ -47,7 +47,8 @@ button,input,select{font:inherit;color:inherit}
 .btn.danger{color:var(--bad)}
 .gauge{display:grid;place-items:center;position:relative;margin:4px auto 10px;width:200px;height:200px}
 .gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
-.gauge .track{stroke:var(--line)} .gauge .bar{stroke:var(--accent-text);transition:stroke-dashoffset .5s ease}
+.gauge .track{stroke:var(--line);opacity:.7} .gauge .bar{stroke:url(#gaugeGrad);filter:drop-shadow(0 0 5px rgba(40,170,240,.55));transition:stroke-dashoffset .5s ease}
+.gauge .big{background:linear-gradient(135deg,#00e08a,#14c8e6 55%,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .gauge .mid{position:absolute;text-align:center}
 .gauge .big{font-size:42px;font-weight:800;line-height:1}
 .gauge .sub{color:var(--muted);font-size:12px;margin-top:4px}
@@ -57,7 +58,9 @@ button,input,select{font:inherit;color:inherit}
 .stat span{color:var(--muted);font-size:12px}
 .hbar{position:relative;display:flex;height:16px;border-radius:9px;overflow:hidden;margin:18px 0 22px;background:var(--line)}
 .hbar .seg{display:block;height:100%}
-.hbar .s0{background:var(--line)} .hbar .s1{background:#5cbb98} .hbar .s2{background:#1f9d74} .hbar .s3{background:#006a4e}
+.hbar .s0{background:var(--line)} .hbar .s1{background:#2f7bff} .hbar .s2{background:#ffb020} .hbar .s3{background:#00d27a}
+.hbar .seg+.seg{box-shadow:-2px 0 0 var(--card)}
+.hbar{box-shadow:0 0 12px rgba(40,170,240,.25)}
 .hwrap{position:relative}
 .hpin{position:absolute;top:-6px;width:4px;height:28px;margin-left:-2px;border-radius:3px;background:var(--ink);box-shadow:0 0 0 2px var(--card);transition:left .5s ease}
 .hlab{position:absolute;top:22px;font-size:10px;color:var(--muted);transform:translateX(-50%)}
@@ -95,7 +98,7 @@ label.l{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 .semname{flex:1 1 180px;font-weight:600}
 .semstat{font-size:12px;color:var(--muted);white-space:nowrap}
 .pie{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
-.pie svg{width:170px;height:170px;flex:0 0 auto}
+.pie svg{width:170px;height:170px;flex:0 0 auto;filter:saturate(1.15) drop-shadow(0 0 8px rgba(40,170,240,.2))}
 .legend{display:grid;gap:6px;min-width:170px;flex:1}
 .lg{display:grid;grid-template-columns:14px 38px 1fr 44px;gap:8px;align-items:center;font-size:14px}
 .lg i{width:14px;height:14px;border-radius:4px;display:block}
@@ -154,7 +157,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
     <section class="card">
       <h2>Overall CGPA</h2>
       <div class="gauge">
-        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="bar" id="bar" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+        <svg viewBox="0 0 120 120"><defs><linearGradient id="gaugeGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00e08a"/><stop offset=".5" stop-color="#14c8e6"/><stop offset="1" stop-color="#3b82f6"/></linearGradient></defs><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="bar" id="bar" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
         <div class="mid"><div class="big" id="cgpa">0.00</div><div class="sub" id="cgSub">out of 4.00</div></div>
       </div>
       <div class="stats">
@@ -177,9 +180,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
         <span class="hlab" style="left:0%;transform:none">3.00</span><span class="hlab" style="left:50%">3.50</span><span class="hlab" style="left:65%">3.65</span><span class="hlab" style="left:80%">3.80</span><span class="hlab" style="left:100%;transform:translateX(-100%)">4.00</span>
       </div>
       <div class="tiers" id="tiers">
-        <div class="tier" data-t="3"><span><i class="sw" style="background:#006a4e"></i>Summa Cum Laude</span><span>3.80 – 4.00</span></div>
-        <div class="tier" data-t="2"><span><i class="sw" style="background:#1f9d74"></i>Magna Cum Laude</span><span>3.65 – 3.79</span></div>
-        <div class="tier" data-t="1"><span><i class="sw" style="background:#5cbb98"></i>Cum Laude</span><span>3.50 – 3.64</span></div>
+        <div class="tier" data-t="3"><span><i class="sw" style="background:#00d27a"></i>Summa Cum Laude</span><span>3.80 – 4.00</span></div>
+        <div class="tier" data-t="2"><span><i class="sw" style="background:#ffb020"></i>Magna Cum Laude</span><span>3.65 – 3.79</span></div>
+        <div class="tier" data-t="1"><span><i class="sw" style="background:#2f7bff"></i>Cum Laude</span><span>3.50 – 3.64</span></div>
       </div>
       <p class="hmsg" id="honMsg"></p>
     </section>
@@ -268,8 +271,8 @@ const GRADES=[["A",4],["A-",3.7],["B+",3.3],["B",3],["B-",2.7],["C+",2.3],["C",2
 const GP={}; GRADES.forEach(x=>{GP[x[0]]=x[1];});
 const KEY="gradeLedger.v1"; /* storage key kept from earlier versions so saved data survives updates */
 const TIERS={summa:["Summa Cum Laude",3.8],magna:["Magna Cum Laude",3.65],cum:["Cum Laude",3.5]};
-const PIE_EXACT={"A":"#0b6e4f","A-":"#1f9d74","B+":"#3dc08f","B":"#7fd8b3","B-":"#b9ead6","C+":"#f2c94c","C":"#e6a93a","C-":"#d98a2b","D+":"#e07a5f","D":"#c8553d","F":"#8b1d1d"};
-const PIE_LETTER={"A":"#0b6e4f","B":"#3dc08f","C":"#e6a93a","D":"#c8553d","F":"#8b1d1d"};
+const PIE_EXACT={"A":"#00b86b","A-":"#14d4a8","B+":"#22c5e8","B":"#3b82f6","B-":"#818cf8","C+":"#ffc21a","C":"#ff9a1a","C-":"#ff6f1a","D+":"#ff4d4d","D":"#e6194b","F":"#b00020"};
+const PIE_LETTER={"A":"#00b86b","B":"#3b82f6","C":"#ffa31a","D":"#ff4d4d","F":"#c0102f"};
 const $=id=>document.getElementById(id);
 const uid=()=>Math.random().toString(36).slice(2,10);
 const cleanId=v=>String(v||"").replace(/[^\w-]/g,"")||uid();
