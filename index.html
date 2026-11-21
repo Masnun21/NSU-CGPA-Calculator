@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Grade Ledger: a private CGPA planner with sheets, retakes, what-if planning and sync links. Data stays in your browser.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23006a4e'/%3E%3Ctext x='32' y='43' font-size='30' font-family='Arial' font-weight='700' text-anchor='middle' fill='white'%3EGL%3C/text%3E%3C/svg%3E">
+<title>Grade Ledger · CGPA Planner</title>
+<style>
+:root{
+  --bg:#ffffff; --bg2:#f2f6f4; --card:#ffffff; --ink:#0a0a0a; --muted:#5a6661;
+  --line:#dde4e0; --accent:#006a4e; --accent-ink:#ffffff; --accent-text:#006a4e; --accent-soft:#e2f1eb;
+  --bad:#b42318; --field:#f5f8f6; --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,40,30,.07);
+}
+:root[data-theme="dark"]{
+  --bg:#000000; --bg2:#050807; --card:#0b0f0d; --ink:#f4f4f4; --muted:#93a39c;
+  --line:#1d2723; --accent:#0a7a58; --accent-ink:#ffffff; --accent-text:#3ddc9f; --accent-soft:#0d2a21;
+  --bad:#ff7b72; --field:#111815; --shadow:0 1px 2px rgba(0,0,0,.6),0 8px 24px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg2);min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+.topbar{background:#000;color:#fff;border-bottom:3px solid var(--accent)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:1120px;margin:0 auto;padding:12px 16px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.3px}
+.logo{width:34px;height:34px;border-radius:9px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;font-size:14px}
+.brand small{display:block;font-weight:400;font-size:11px;color:#9db3aa;letter-spacing:.08em;text-transform:uppercase}
+.tbtns{display:flex;gap:8px}
+.icon-btn{border:1px solid #2a3a34;background:#0d1411;color:#fff;border-radius:10px;padding:7px 12px;cursor:pointer}
+.icon-btn:hover{border-color:#3ddc9f}
+.wrap{max-width:1120px;margin:0 auto;padding:16px 16px 48px;display:grid;grid-template-columns:330px 1fr;gap:16px;align-items:start}
+@media (max-width:880px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+.card h2{margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+.side{display:grid;gap:16px;position:sticky;top:12px}
+@media (max-width:880px){.side{position:static}}
+.sheets{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px;scrollbar-width:thin}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--field);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--field);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn:hover{border-color:var(--accent-text)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+.btn.danger{color:var(--bad)}
+.gauge{display:grid;place-items:center;position:relative;margin:4px auto 10px;width:200px;height:200px}
+.gauge svg{width:100%;height:100%;transform:rotate(-90deg)}
+.gauge .track{stroke:var(--line)} .gauge .bar{stroke:var(--accent-text);transition:stroke-dashoffset .5s ease}
+.gauge .mid{position:absolute;text-align:center}
+.gauge .big{font-size:42px;font-weight:800;line-height:1}
+.gauge .sub{color:var(--muted);font-size:12px;margin-top:4px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--field);border-radius:12px;padding:10px}
+.stat b{display:block;font-size:18px}
+.stat span{color:var(--muted);font-size:12px}
+.hbar{position:relative;display:flex;height:16px;border-radius:9px;overflow:hidden;margin:18px 0 22px;background:var(--line)}
+.hbar .seg{display:block;height:100%}
+.hbar .s0{background:var(--line)} .hbar .s1{background:#5cbb98} .hbar .s2{background:#1f9d74} .hbar .s3{background:#006a4e}
+.hwrap{position:relative}
+.hpin{position:absolute;top:-6px;width:4px;height:28px;margin-left:-2px;border-radius:3px;background:var(--ink);box-shadow:0 0 0 2px var(--card);transition:left .5s ease}
+.hlab{position:absolute;top:22px;font-size:10px;color:var(--muted);transform:translateX(-50%)}
+.tiers{display:grid;gap:6px;margin-top:4px}
+.tier{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;font-size:13px;background:var(--field)}
+.tier span:last-child{color:var(--muted);white-space:nowrap}
+.tier.on{border-color:var(--accent-text);background:var(--accent-soft);font-weight:600}
+.tier .sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}
+.hmsg{margin:10px 0 0;font-size:13px;color:var(--muted)}
+.mix{margin-top:12px;display:grid;gap:5px}
+.mix .m{display:grid;grid-template-columns:26px 1fr 18px;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.mix .b{height:8px;border-radius:6px;background:var(--line);overflow:hidden}
+.mix .b i{display:block;height:100%;background:var(--accent-text);border-radius:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.l{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.f{width:100%;border:1px solid var(--line);background:var(--field);border-radius:10px;padding:9px 10px;min-width:0}
+.f:focus{outline:2px solid var(--accent-text);outline-offset:0;border-color:transparent}
+.list{display:grid;gap:8px;margin-bottom:10px}
+.row{display:grid;grid-template-columns:26px 1fr 78px 92px 36px;gap:8px;align-items:center}
+.row.rt{grid-template-columns:26px 1fr 72px 84px 84px 36px}
+.row.off .f{opacity:.45;text-decoration:line-through}
+.row input[type=checkbox]{width:18px;height:18px;accent-color:var(--accent);margin:0 auto;display:block}
+@media (max-width:560px){
+  .row{grid-template-columns:24px 1fr 66px 86px 32px;gap:6px}
+  .row.rt{grid-template-columns:24px 1fr 1fr 1fr}
+  .row.rt .name{grid-column:2/-1}
+  .row.rt .x{grid-column:1/-1;width:100%}
+}
+.x{border:1px solid var(--line);background:transparent;border-radius:10px;height:38px;cursor:pointer;color:var(--muted)}
+.x:hover{color:var(--bad);border-color:var(--bad)}
+.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:8px}
+.hdr h2{margin:0}
+.note{color:var(--muted);font-size:13px;margin:0 0 10px}
+.plan-out{margin-top:12px;padding:12px;border-radius:12px;background:var(--accent-soft);font-size:14px}
+.plan-out.bad{background:rgba(180,35,24,.1);color:var(--bad)}
+.wi{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:8px;margin-top:10px}
+.wi div{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center;font-size:12px;color:var(--muted)}
+.wi b{display:block;font-size:16px;color:var(--ink)}
+.snap{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.snap:first-child{border-top:0}
+.snap small{color:var(--muted);display:block}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+.main{display:grid;gap:16px}
+.save-row{display:flex;gap:8px;margin-bottom:8px}
+.trend{margin:6px 0 12px}
+.trend svg{width:100%;height:auto;display:block}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#000;color:#fff;border:1px solid var(--accent);padding:10px 16px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;display:flex;gap:12px;align-items:center;max-width:92vw}
+.toast.show{opacity:1;pointer-events:auto}
+.toast button{background:none;border:0;color:#3ddc9f;font-weight:700;cursor:pointer;padding:0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
+@media print{
+  .topbar,.btns,.x,.toast,footer,.save-row,#addCourse,#addRetake,.sheets{display:none!important}
+  body{background:#fff}.wrap{display:block}.card{box-shadow:none;break-inside:avoid;margin-bottom:12px}.side{position:static}
+}
+</style>
+</head>
+<body>
+<div class="topbar"><header class="top">
+  <div class="brand"><div class="logo">GL</div><div>Grade Ledger<small>CGPA planner</small></div></div>
+  <div class="tbtns"><button class="icon-btn" id="themeBtn" aria-label="Toggle theme">Theme</button></div>
+</header></div>
+
+<div class="wrap">
+  <aside class="side">
+    <section class="card">
+      <h2>Sheets</h2>
+      <div class="sheets" id="sheets"></div>
+      <div class="btns">
+        <button class="btn" id="newSheet">+ New</button>
+        <button class="btn" id="dupSheet">Duplicate</button>
+        <button class="btn" id="renameSheet">Rename</button>
+        <button class="btn danger" id="deleteSheet">Delete</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Overall CGPA</h2>
+      <div class="gauge">
+        <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="bar" id="bar" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg>
+        <div class="mid"><div class="big" id="cgpa">0.00</div><div class="sub" id="cgSub">out of 4.00</div></div>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="semGpa">0.00</b><span>This term GPA</span></div>
+        <div class="stat"><b id="totCr">0</b><span>Total credits</span></div>
+        <div class="stat"><b id="totPts">0.00</b><span>Grade points</span></div>
+        <div class="stat"><b id="gain">+0.00</b><span>Retake gain</span></div>
+      </div>
+      <div class="mix" id="mix"></div>
+      <div class="btns" style="margin-top:12px">
+        <button class="btn" id="copySum">Copy summary</button>
+        <button class="btn" id="printBtn">Print</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Distinction</h2>
+      <div class="hwrap">
+        <div class="hbar"><span class="seg s0" style="width:50%"></span><span class="seg s1" style="width:15%"></span><span class="seg s2" style="width:15%"></span><span class="seg s3" style="width:20%"></span></div>
+        <i class="hpin" id="honPin" style="left:0"></i>
+        <span class="hlab" style="left:0%;transform:none">3.00</span><span class="hlab" style="left:50%">3.50</span><span class="hlab" style="left:65%">3.65</span><span class="hlab" style="left:80%">3.80</span><span class="hlab" style="left:100%;transform:translateX(-100%)">4.00</span>
+      </div>
+      <div class="tiers" id="tiers">
+        <div class="tier" data-t="3"><span><i class="sw" style="background:#006a4e"></i>Summa Cum Laude</span><span>3.80 – 4.00</span></div>
+        <div class="tier" data-t="2"><span><i class="sw" style="background:#1f9d74"></i>Magna Cum Laude</span><span>3.65 – 3.79</span></div>
+        <div class="tier" data-t="1"><span><i class="sw" style="background:#5cbb98"></i>Cum Laude</span><span>3.50 – 3.64</span></div>
+      </div>
+      <p class="hmsg" id="honMsg"></p>
+    </section>
+  </aside>
+
+  <main class="main">
+    <section class="card">
+      <h2>Your record so far</h2>
+      <div class="grid2">
+        <div><label class="l" for="pc">Credits completed</label><input class="f" id="pc" type="number" inputmode="decimal" min="0" step="0.5" placeholder="e.g. 60"></div>
+        <div><label class="l" for="pg">CGPA so far</label><input class="f" id="pg" type="number" inputmode="decimal" min="0" max="4" step="0.01" placeholder="e.g. 3.45"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="hdr"><h2>This term's courses</h2><button class="btn" id="addCourse">+ Add course</button></div>
+      <p class="note">Untick a course to leave it out and see a what-if result.</p>
+      <div class="list" id="courses"></div>
+    </section>
+
+    <section class="card">
+      <div class="hdr"><h2>Retakes</h2><button class="btn" id="addRetake">+ Add retake</button></div>
+      <p class="note">A retake only helps: if the new grade is lower it is ignored, and credits are never counted twice.</p>
+      <div class="list" id="retakes"></div>
+    </section>
+
+    <section class="card">
+      <h2>Target planner</h2>
+      <div class="grid2">
+        <div><label class="l" for="tg">Target CGPA</label><input class="f" id="tg" type="number" inputmode="decimal" min="0" max="4" step="0.01" placeholder="e.g. 3.50"></div>
+        <div><label class="l" for="tc">Credits you plan to take</label><input class="f" id="tc" type="number" inputmode="decimal" min="0" step="0.5" placeholder="e.g. 15"></div>
+      </div>
+      <div class="plan-out" id="planOut">Enter a target and the credits you plan to take.</div>
+      <div class="note" style="margin:12px 0 0" id="wiHead"></div>
+      <div class="wi" id="whatIf"></div>
+    </section>
+
+    <section class="card">
+      <div class="hdr"><h2>Saved calculations</h2></div>
+      <div class="trend" id="trend"></div>
+      <div class="save-row">
+        <input class="f" id="snapName" placeholder="Name this result (e.g. Fall 2026)">
+        <button class="btn primary" id="saveSnap">Save</button>
+      </div>
+      <div id="snaps"></div>
+    </section>
+
+    <section class="card">
+      <h2>Backup &amp; sync</h2>
+      <p class="note">Data lives in this browser. To use another device, copy a sync link and open it there, or move a backup file.</p>
+      <div class="btns">
+        <button class="btn primary" id="syncBtn">Copy sync link</button>
+        <button class="btn" id="exportBtn">Export backup</button>
+        <button class="btn" id="importBtn">Import backup</button>
+        <button class="btn danger" id="clearBtn">Clear all</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </section>
+  </main>
+</div>
+<footer>Private by design: no account, no server. Sync links keep your data in the part of the URL that is never sent to a server.</footer>
+<div class="toast" id="toast"><span id="toastTxt"></span><button id="toastUndo" hidden>Undo</button></div>
+
+<script>
+(function(){
+"use strict";
+const GRADES=[["A",4],["A-",3.7],["B+",3.3],["B",3],["B-",2.7],["C+",2.3],["C",2],["C-",1.7],["D+",1.3],["D",1],["F",0]];
+const GP={}; GRADES.forEach(g=>{GP[g[0]]=g[1];});
+const KEY="gradeLedger.v1";
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const cleanId=v=>String(v||"").replace(/[^\w-]/g,"")||uid();
+const esc=v=>String(v==null?"":v).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const num=v=>{const n=parseFloat(v);return isFinite(n)&&n>0?n:0;};
+const blankCourse=()=>({id:uid(),name:"",credits:"3",grade:"",off:false});
+const blankRetake=()=>({id:uid(),name:"",credits:"3",oldGrade:"",newGrade:"",off:false});
+const newSheet=name=>({id:uid(),name:name,prevCredits:"",prevCgpa:"",courses:[blankCourse()],retakes:[],tg:"",tc:""});
+const g=(v)=>GP.hasOwnProperty(v)?v:"";
+function normSheet(s){
+  s=s||{};
+  return {id:cleanId(s.id),name:String(s.name||"Sheet").slice(0,60),
+    prevCredits:s.prevCredits==null?"":String(s.prevCredits),prevCgpa:s.prevCgpa==null?"":String(s.prevCgpa),
+    tg:s.tg==null?"":String(s.tg),tc:s.tc==null?"":String(s.tc),
+    courses:(Array.isArray(s.courses)?s.courses:[]).map(c=>({id:cleanId(c&&c.id),name:String((c&&c.name)||"").slice(0,60),credits:c&&c.credits!=null?String(c.credits):"",grade:g(c&&c.grade),off:!!(c&&c.off)})),
+    retakes:(Array.isArray(s.retakes)?s.retakes:[]).map(c=>({id:cleanId(c&&c.id),name:String((c&&c.name)||"").slice(0,60),credits:c&&c.credits!=null?String(c.credits):"",oldGrade:g(c&&c.oldGrade),newGrade:g(c&&c.newGrade),off:!!(c&&c.off)}))};
+}
+function normSaved(x){
+  x=x||{};
+  return {id:cleanId(x.id),name:String(x.name||"Saved").slice(0,60),cgpa:isFinite(+x.cgpa)?+x.cgpa:0,credits:isFinite(+x.credits)?+x.credits:0,date:String(x.date||""),data:normSheet(x.data)};
+}
+function normState(d){
+  const sheets=d.sheets.map(normSheet);
+  const saved=(Array.isArray(d.saved)?d.saved:[]).map(normSaved);
+  const active=sheets.some(s=>s.id===cleanId(d.activeId))?cleanId(d.activeId):sheets[0].id;
+  return {sheets:sheets,saved:saved,activeId:active,theme:d.theme==="dark"||d.theme==="light"?d.theme:""};
+}
+let state=load();
+function load(){
+  try{const raw=localStorage.getItem(KEY); if(raw){const d=JSON.parse(raw); if(d&&Array.isArray(d.sheets)&&d.sheets.length) return normState(d);}}catch(e){}
+  const sh=newSheet("Sheet 1"); return {sheets:[sh],activeId:sh.id,saved:[],theme:""};
+}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));}catch(e){toast("Could not save: browser storage is blocked");}}
+const sheet=()=>state.sheets.find(s=>s.id===state.activeId)||state.sheets[0];
+
+/* ---------- math ---------- */
+function calc(s){
+  const pc=num(s.prevCredits), pg=Math.min(num(s.prevCgpa),4);
+  let semCr=0, semPts=0, gain=0;
+  s.courses.forEach(c=>{ if(!c.off&&GP.hasOwnProperty(c.grade)){const cr=num(c.credits); semCr+=cr; semPts+=cr*GP[c.grade];} });
+  s.retakes.forEach(r=>{
+    if(!r.off&&GP.hasOwnProperty(r.oldGrade)&&GP.hasOwnProperty(r.newGrade)){const d=GP[r.newGrade]-GP[r.oldGrade]; if(d>0) gain+=d*num(r.credits);}
+  });
+  const totCr=pc+semCr, totPts=pc*pg+semPts+gain;
+  return {pc,semCr,semPts,gain,totCr,totPts,cgpa:totCr>0?totPts/totCr:0,gpa:semCr>0?semPts/semCr:0};
+}
+function nearestLetter(c){let best="",d=9;GRADES.forEach(x=>{const k=Math.abs(x[1]-c);if(k<d){d=k;best=x[0];}});return best;}
+
+/* ---------- render ---------- */
+const gradeOpts=(sel,ph)=>'<option value="">'+ph+'</option>'+GRADES.map(x=>'<option value="'+x[0]+'"'+(x[0]===sel?' selected':'')+'>'+x[0]+'</option>').join("");
+function renderSheets(){
+  $("sheets").innerHTML=state.sheets.map(s=>'<button class="chip'+(s.id===state.activeId?' on':'')+'" data-id="'+esc(s.id)+'">'+esc(s.name)+'</button>').join("");
+}
+function renderInputs(){const s=sheet();$("pc").value=s.prevCredits;$("pg").value=s.prevCgpa;$("tg").value=s.tg||"";$("tc").value=s.tc||"";}
+function renderRows(){
+  const s=sheet();
+  $("courses").innerHTML=s.courses.length?s.courses.map(c=>
+    '<div class="row'+(c.off?' off':'')+'" data-id="'+esc(c.id)+'">'+
+    '<input type="checkbox" data-k="on" aria-label="Include course"'+(c.off?'':' checked')+'>'+
+    '<input class="f name" data-k="name" placeholder="Course (e.g. CSE115)" value="'+esc(c.name)+'">'+
+    '<input class="f" data-k="credits" type="number" inputmode="decimal" min="0" max="6" step="0.5" placeholder="Cr" value="'+esc(c.credits)+'">'+
+    '<select class="f" data-k="grade">'+gradeOpts(c.grade,"Grade")+'</select>'+
+    '<button class="x" data-del aria-label="Remove course">×</button></div>').join(""):'<div class="empty">No courses yet.</div>';
+  $("retakes").innerHTML=s.retakes.length?s.retakes.map(r=>
+    '<div class="row rt'+(r.off?' off':'')+'" data-id="'+esc(r.id)+'">'+
+    '<input type="checkbox" data-k="on" aria-label="Include retake"'+(r.off?'':' checked')+'>'+
+    '<input class="f name" data-k="name" placeholder="Course" value="'+esc(r.name)+'">'+
+    '<input class="f" data-k="credits" type="number" inputmode="decimal" min="0" max="6" step="0.5" placeholder="Cr" value="'+esc(r.credits)+'">'+
+    '<select class="f" data-k="oldGrade">'+gradeOpts(r.oldGrade,"Old")+'</select>'+
+    '<select class="f" data-k="newGrade">'+gradeOpts(r.newGrade,"New")+'</select>'+
+    '<button class="x" data-del aria-label="Remove retake">×</button></div>').join(""):'<div class="empty">No retakes.</div>';
+}
+function renderMix(s){
+  const cnt={}; let max=0;
+  s.courses.forEach(c=>{if(!c.off&&GP.hasOwnProperty(c.grade)){cnt[c.grade]=(cnt[c.grade]||0)+1;max=Math.max(max,cnt[c.grade]);}});
+  $("mix").innerHTML=GRADES.filter(x=>cnt[x[0]]).map(x=>
+    '<div class="m"><span>'+x[0]+'</span><div class="b"><i style="width:'+(cnt[x[0]]/max*100)+'%"></i></div><span>'+cnt[x[0]]+'</span></div>').join("");
+}
+function renderResults(){
+  const s=sheet(), r=calc(s);
+  $("cgpa").textContent=r.cgpa.toFixed(2);
+  $("cgSub").textContent=r.cgpa>0?"out of 4.00 · about "+nearestLetter(r.cgpa):"out of 4.00";
+  $("semGpa").textContent=r.gpa.toFixed(2);
+  $("totCr").textContent=String(Math.round(r.totCr*100)/100);
+  $("totPts").textContent=r.totPts.toFixed(2);
+  $("gain").textContent="+"+r.gain.toFixed(2);
+  const C=326.7; $("bar").style.strokeDashoffset=String(C-C*Math.min(r.cgpa/4,1));
+  renderMix(s); renderPlan(s,r); renderHonors(r);
+}
+function renderHonors(r){
+  const c=Math.round(r.cgpa*100)/100, cl=Math.min(Math.max(c,3),4);
+  $("honPin").style.left=((cl-3)*100)+"%";
+  const tier=c>=3.8?3:c>=3.65?2:c>=3.5?1:0;
+  document.querySelectorAll("#tiers .tier").forEach(t=>t.classList.toggle("on",+t.dataset.t===tier));
+  const names=["","Cum Laude","Magna Cum Laude","Summa Cum Laude"], mins=[3.5,3.5,3.65,3.8];
+  let m;
+  if(r.totCr<=0) m="Add your credits and grades to see where you stand.";
+  else if(tier===3) m="You are in the Summa Cum Laude range at "+c.toFixed(2)+". Check your university's other eligibility rules too.";
+  else if(tier===0) m="At "+c.toFixed(2)+" you are "+(3.5-c).toFixed(2)+" below the Cum Laude range (3.50).";
+  else m="You are in the "+names[tier]+" range at "+c.toFixed(2)+". "+(mins[tier+1]-c).toFixed(2)+" more reaches "+names[tier+1]+".";
+  $("honMsg").textContent=m;
+}
+function renderPlan(s,r){
+  const out=$("planOut"), tg=parseFloat(s.tg), tc=num(s.tc);
+  out.classList.remove("bad"); $("whatIf").innerHTML=""; $("wiHead").textContent="";
+  if(tc>0){
+    $("wiHead").textContent="If you average one grade across the next "+tc+" credits, your CGPA becomes:";
+    $("whatIf").innerHTML=["A","A-","B+","B","B-","C+","C"].map(k=>'<div>'+k+'<b>'+((r.totPts+GP[k]*tc)/(r.totCr+tc)).toFixed(2)+'</b></div>').join("");
+  }
+  if(!isFinite(tg)||tc<=0){out.textContent="Enter a target and the credits you plan to take.";return;}
+  const need=(tg*(r.totCr+tc)-r.totPts)/tc;
+  if(need>4){out.classList.add("bad");out.textContent="Not reachable in "+tc+" credits: you would need a "+need.toFixed(2)+" GPA, above the 4.00 maximum. Try more credits or a lower target.";}
+  else if(need<=0){out.textContent="You already clear "+tg.toFixed(2)+". Even a 0.00 term GPA over "+tc+" credits keeps you at or above it.";}
+  else{
+    const lt=GRADES.slice().reverse().find(x=>x[1]>=need-1e-9);
+    out.textContent="You need a "+need.toFixed(2)+" GPA across the next "+tc+" credits to finish at "+tg.toFixed(2)+(lt?" (an average of about "+lt[0]+" or better).":".");
+  }
+}
+function trendSvg(){
+  const pts=state.saved.map(x=>x.cgpa);
+  if(pts.length<2) return '<div class="empty">Save two or more results to see your CGPA trend here.</div>';
+  const W=300,H=120,px=26,py=16, min=Math.max(0,Math.floor((Math.min.apply(null,pts)-0.2)*2)/2), max=4;
+  const X=i=>px+(W-2*px)*(pts.length===1?0:i/(pts.length-1)), Y=v=>H-py-(H-2*py)*((v-min)/(max-min));
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="CGPA trend">';
+  [min,(min+max)/2,max].forEach(t=>{svg+='<line x1="'+px+'" x2="'+(W-px)+'" y1="'+Y(t)+'" y2="'+Y(t)+'" stroke="var(--line)"/><text x="4" y="'+(Y(t)+3)+'" font-size="9" fill="var(--muted)">'+t.toFixed(1)+'</text>';});
+  svg+='<polyline fill="none" stroke="var(--accent-text)" stroke-width="2.5" stroke-linejoin="round" points="'+pts.map((v,i)=>X(i)+','+Y(v)).join(" ")+'"/>';
+  pts.forEach((v,i)=>{svg+='<circle cx="'+X(i)+'" cy="'+Y(v)+'" r="3.5" fill="var(--accent-text)"/>'+(pts.length<=8?'<text x="'+X(i)+'" y="'+(Y(v)-8)+'" font-size="9" text-anchor="middle" fill="var(--ink)">'+v.toFixed(2)+'</text>':'');});
+  return svg+'</svg>';
+}
+function renderSaved(){
+  $("trend").innerHTML=trendSvg();
+  const el=$("snaps");
+  if(!state.saved.length){el.innerHTML='<div class="empty">Nothing saved yet.</div>';return;}
+  el.innerHTML=state.saved.slice().reverse().map(x=>
+    '<div class="snap" data-id="'+esc(x.id)+'"><div><b>'+esc(x.name)+'</b> · '+x.cgpa.toFixed(2)+
+    '<small>'+x.credits+' credits · '+esc(x.date)+'</small></div>'+
+    '<div class="btns"><button class="btn" data-load>Open</button><button class="x" data-delsnap aria-label="Delete">×</button></div></div>').join("");
+}
+function renderAll(){renderSheets();renderInputs();renderRows();renderResults();renderSaved();}
+
+/* ---------- toast + undo ---------- */
+let undoFn=null, toastT=null;
+function toast(t,fn){
+  $("toastTxt").textContent=t; undoFn=fn||null; $("toastUndo").hidden=!fn;
+  $("toast").classList.add("show"); clearTimeout(toastT);
+  toastT=setTimeout(()=>{$("toast").classList.remove("show");undoFn=null;},fn?6000:2200);
+}
+$("toastUndo").onclick=()=>{if(undoFn){const f=undoFn;undoFn=null;f();}$("toast").classList.remove("show");};
+
+/* ---------- events ---------- */
+$("sheets").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;state.activeId=b.dataset.id;persist();renderAll();});
+$("newSheet").onclick=()=>{
+  const n=prompt("Name for the new sheet:","Sheet "+(state.sheets.length+1)); if(!n||!n.trim())return;
+  const s=newSheet(n.trim().slice(0,60)); state.sheets.push(s); state.activeId=s.id; persist(); renderAll();
+};
+$("dupSheet").onclick=()=>{
+  const c=normSheet(JSON.parse(JSON.stringify(sheet()))); c.id=uid(); c.name=(c.name+" copy").slice(0,60);
+  c.courses.forEach(x=>x.id=uid()); c.retakes.forEach(x=>x.id=uid());
+  state.sheets.push(c); state.activeId=c.id; persist(); renderAll(); toast("Sheet duplicated");
+};
+$("renameSheet").onclick=()=>{const s=sheet(),n=prompt("Rename sheet:",s.name);if(!n||!n.trim())return;s.name=n.trim().slice(0,60);persist();renderSheets();};
+$("deleteSheet").onclick=()=>{
+  if(state.sheets.length<2){toast("Keep at least one sheet");return;}
+  const s=sheet(); if(!confirm('Delete "'+s.name+'"?'))return;
+  const idx=state.sheets.indexOf(s);
+  state.sheets=state.sheets.filter(x=>x.id!==s.id); state.activeId=state.sheets[0].id; persist(); renderAll();
+  toast("Sheet deleted",()=>{state.sheets.splice(Math.min(idx,state.sheets.length),0,s);state.activeId=s.id;persist();renderAll();});
+};
+[["pc","prevCredits"],["pg","prevCgpa"],["tg","tg"],["tc","tc"]].forEach(p=>{$(p[0]).oninput=function(){sheet()[p[1]]=this.value;persist();renderResults();};});
+$("addCourse").onclick=()=>{sheet().courses.push(blankCourse());persist();renderRows();renderResults();};
+$("addRetake").onclick=()=>{sheet().retakes.push(blankRetake());persist();renderRows();renderResults();};
+
+function bindList(id,key){
+  const el=$(id);
+  function upd(e){
+    const row=e.target.closest(".row"); if(!row||!e.target.dataset.k)return;
+    const item=sheet()[key].find(x=>x.id===row.dataset.id); if(!item)return;
+    const k=e.target.dataset.k;
+    if(k==="on"){item.off=!e.target.checked;row.classList.toggle("off",item.off);}
+    else item[k]=e.target.value;
+    persist(); renderResults();
+  }
+  el.addEventListener("input",upd); el.addEventListener("change",upd);
+  el.addEventListener("click",e=>{
+    if(!e.target.closest("[data-del]"))return;
+    const row=e.target.closest(".row"), s=sheet(), list=s[key];
+    const idx=list.findIndex(x=>x.id===row.dataset.id); if(idx<0)return;
+    const item=list[idx]; list.splice(idx,1); persist(); renderRows(); renderResults();
+    toast("Removed",()=>{if(state.sheets.indexOf(s)<0)return;s[key].splice(Math.min(idx,s[key].length),0,item);persist();if(sheet()===s){renderRows();renderResults();}});
+  });
+}
+bindList("courses","courses"); bindList("retakes","retakes");
+
+$("saveSnap").onclick=()=>{
+  const s=sheet(), r=calc(s), name=$("snapName").value.trim()||s.name;
+  state.saved.push({id:uid(),name:name.slice(0,60),cgpa:r.cgpa,credits:Math.round(r.totCr*100)/100,date:new Date().toLocaleDateString(),data:normSheet(JSON.parse(JSON.stringify(s)))});
+  $("snapName").value=""; persist(); renderSaved(); toast("Saved");
+};
+$("snaps").addEventListener("click",e=>{
+  const row=e.target.closest(".snap"); if(!row)return;
+  const idx=state.saved.findIndex(v=>v.id===row.dataset.id); if(idx<0)return; const x=state.saved[idx];
+  if(e.target.closest("[data-load]")){
+    const c=normSheet(JSON.parse(JSON.stringify(x.data))); c.id=uid(); c.name=(x.name+" (opened)").slice(0,60);
+    c.courses.forEach(k=>k.id=uid()); c.retakes.forEach(k=>k.id=uid());
+    state.sheets.push(c); state.activeId=c.id; persist(); renderAll(); toast("Opened as a new sheet");
+  } else if(e.target.closest("[data-delsnap]")){
+    state.saved.splice(idx,1); persist(); renderSaved();
+    toast("Deleted",()=>{state.saved.splice(Math.min(idx,state.saved.length),0,x);persist();renderSaved();});
+  }
+});
+
+/* summary / print */
+function copyText(t){
+  if(navigator.clipboard&&window.isSecureContext){return navigator.clipboard.writeText(t);}
+  return new Promise((res,rej)=>{const a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();try{document.execCommand("copy")?res():rej();}catch(err){rej(err);}a.remove();});
+}
+$("copySum").onclick=()=>{
+  const s=sheet(), r=calc(s);
+  let t=s.name+"\nCGPA: "+r.cgpa.toFixed(2)+" | Term GPA: "+r.gpa.toFixed(2)+" | Total credits: "+(Math.round(r.totCr*100)/100)+"\n";
+  s.courses.filter(c=>!c.off&&c.grade).forEach(c=>{t+="- "+(c.name||"Course")+" ("+c.credits+" cr): "+c.grade+"\n";});
+  s.retakes.filter(c=>!c.off&&c.oldGrade&&c.newGrade).forEach(c=>{t+="- Retake "+(c.name||"Course")+" ("+c.credits+" cr): "+c.oldGrade+" -> "+c.newGrade+"\n";});
+  copyText(t.trim()).then(()=>toast("Summary copied"),()=>toast("Copy failed"));
+};
+$("printBtn").onclick=()=>window.print();
+
+/* backup / sync */
+$("exportBtn").onclick=()=>{
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+  a.download="grade-ledger-backup-"+new Date().toISOString().slice(0,10)+".json";
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+};
+$("importBtn").onclick=()=>$("importFile").click();
+$("importFile").onchange=function(){
+  const f=this.files[0]; if(!f)return; const inp=this, rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const d=JSON.parse(rd.result); if(!d||!Array.isArray(d.sheets)||!d.sheets.length)throw new Error("bad");
+      if(!confirm("Replace everything on this device with the backup?"))return;
+      state=normState(d); persist(); applyTheme(); renderAll(); toast("Backup imported");
+    }catch(err){toast("That file is not a valid backup");}
+    inp.value="";
+  };
+  rd.readAsText(f);
+};
+$("clearBtn").onclick=()=>{
+  if(!confirm("Delete ALL sheets and saved calculations on this device?"))return;
+  const sh=newSheet("Sheet 1"); state={sheets:[sh],activeId:sh.id,saved:[],theme:state.theme}; persist(); renderAll();
+};
+function b64enc(str){return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
+function b64dec(s){s=s.replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";return decodeURIComponent(escape(atob(s)));}
+$("syncBtn").onclick=()=>{
+  const url=location.href.split("#")[0]+"#sync="+b64enc(JSON.stringify({sheets:state.sheets,saved:state.saved}));
+  copyText(url).then(()=>toast(url.length>7000?"Link copied, but it is long. If it fails, use Export instead":"Sync link copied. Open it on your other device"),()=>toast("Copy failed"));
+};
+function checkSyncHash(){
+  const m=location.hash.match(/^#sync=([\w-]+)$/); if(!m)return;
+  try{
+    const d=JSON.parse(b64dec(m[1])); if(!d||!Array.isArray(d.sheets)||!d.sheets.length)throw new Error("bad");
+    const sheets=d.sheets.map(normSheet), saved=(Array.isArray(d.saved)?d.saved:[]).map(normSaved);
+    if(confirm("Import "+sheets.length+" sheet(s) and "+saved.length+" saved result(s) from this link? Matching items are overwritten; nothing else is deleted.")){
+      sheets.forEach(s=>{const i=state.sheets.findIndex(x=>x.id===s.id);if(i>=0)state.sheets[i]=s;else state.sheets.push(s);});
+      saved.forEach(s=>{const i=state.saved.findIndex(x=>x.id===s.id);if(i>=0)state.saved[i]=s;else state.saved.push(s);});
+      state.activeId=sheets[0].id; persist(); renderAll(); toast("Imported from sync link");
+    }
+  }catch(err){toast("That sync link is not valid");}
+  try{history.replaceState(null,"",location.pathname+location.search);}catch(e){}
+}
+
+/* theme */
+function applyTheme(){
+  const t=state.theme||(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  document.documentElement.setAttribute("data-theme",t);
+}
+$("themeBtn").onclick=()=>{state.theme=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark";persist();applyTheme();};
+
+applyTheme(); renderAll(); checkSyncHash();
+if("serviceWorker" in navigator&&(location.protocol==="https:"||location.hostname==="localhost")){
+  window.addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{});});
+}
+})();
+</script>
+</body>
+</html>
