@@ -728,6 +728,7 @@ function rpPie(list){
   return '<div class="rp-pie"><svg viewBox="0 0 160 160" width="130" height="130" role="img" aria-label="Grade distribution">'+paths+'</svg><table class="rp-t rp-lg">'+lg+'</table></div>'+
     '<p class="rp-note">'+total+' course'+(total===1?'':'s')+' counted. Retaken courses count once, with the better grade.</p>';
 }
+function semStatR(sem,r){let cr=0,pts=0;sem.courses.forEach(c=>{if(!c.off&&GP.hasOwnProperty(c.grade)&&!r.superseded.has(c.id)){const x=num(c.credits);cr+=x;pts+=x*GP[c.grade];}});return {cr:cr,gpa:cr>0?pts/cr:0};}
 function rpSemBars(rows){
   if(!rows.length)return '<div class="rp-empty">Add semesters with graded courses to compare them.</div>';
   const lw=140,bx=lw+8,bw=260,rh=26,H=rows.length*rh+6;
@@ -741,7 +742,8 @@ function rpSemBars(rows){
   });
   return svg+'</svg><p class="rp-note">Bar colors follow the distinction tiers: blue 3.50+, amber 3.65+, green 3.80+.</p>';
 }
-function rpLine(labels,vals,tiers){
+function rpLine(labels,vals,tiers,o){
+  o=o||{}; const col=o.color||"#2f7bff", fillc=o.fill||"rgba(47,123,255,.10)";
   const n=vals.length; if(n<2)return '';
   const rot=n>5, W=700,pl=38,pr=82,pt=26,pb=rot?58:36,H=pt+150+pb,ins=34;
   const lo=Math.min.apply(null,vals), min=Math.max(0,Math.floor((lo-0.2)*2)/2), max=4;
@@ -752,21 +754,22 @@ function rpLine(labels,vals,tiers){
   if(tiers)[[3.5,RPC.blue,"#1d5fd6","Cum 3.50"],[3.65,RPC.amber,"#b86e00","Magna 3.65"],[3.8,RPC.green,"#00945a","Summa 3.80"]].forEach(t=>{
     if(t[0]>min&&t[0]<max) svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(t[0]).toFixed(1)+'" y2="'+Y(t[0]).toFixed(1)+'" stroke="'+t[1]+'" stroke-dasharray="5 4"/><text x="'+(W-pr+8)+'" y="'+(Y(t[0])+3.5).toFixed(1)+'" font-size="10" font-weight="600" fill="'+t[2]+'">'+t[3]+'</text>';
   });
+  if(o.ref&&o.ref.v>min&&o.ref.v<max) svg+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(o.ref.v).toFixed(1)+'" y2="'+Y(o.ref.v).toFixed(1)+'" stroke="#5a6661" stroke-dasharray="5 4"/><text x="'+(W-pr+8)+'" y="'+(Y(o.ref.v)+3.5).toFixed(1)+'" font-size="10" font-weight="600" fill="#3a4540">'+esc(o.ref.label)+'</text>';
   const pts=vals.map((v,i)=>X(i).toFixed(1)+","+Y(v).toFixed(1)).join(" ");
-  svg+='<polygon points="'+X(0).toFixed(1)+','+(H-pb)+' '+pts+' '+X(n-1).toFixed(1)+','+(H-pb)+'" fill="rgba(47,123,255,.10)"/>'+
-    '<polyline fill="none" stroke="#2f7bff" stroke-width="2.5" stroke-linejoin="round" points="'+pts+'"/>';
+  svg+='<polygon points="'+X(0).toFixed(1)+','+(H-pb)+' '+pts+' '+X(n-1).toFixed(1)+','+(H-pb)+'" fill="'+fillc+'"/>'+
+    '<polyline fill="none" stroke="'+col+'" stroke-width="2.5" stroke-linejoin="round" points="'+pts+'"/>';
   vals.forEach((v,i)=>{
     const x=X(i).toFixed(1);
-    svg+='<circle cx="'+x+'" cy="'+Y(v).toFixed(1)+'" r="4" fill="#2f7bff" stroke="#fff" stroke-width="1.5"/>';
+    svg+='<circle cx="'+x+'" cy="'+Y(v).toFixed(1)+'" r="4" fill="'+col+'" stroke="#fff" stroke-width="1.5"/>';
     if(n<=14) svg+='<text x="'+x+'" y="'+(Y(v)-10).toFixed(1)+'" text-anchor="middle" font-size="11" font-weight="700" fill="#0a0a0a"'+halo+'>'+v.toFixed(2)+'</text>';
-    const ly=H-pb+16, t=esc(trunc(labels[i],rot?16:20));
+    const ly=H-pb+16, t=esc(trunc(labels[i],rot?20:22));
     svg+=rot?'<text x="'+x+'" y="'+ly+'" text-anchor="end" font-size="10" fill="#5a6661" transform="rotate(-30 '+x+' '+ly+')">'+t+'</text>'
             :'<text x="'+x+'" y="'+ly+'" text-anchor="middle" font-size="10" fill="#5a6661">'+t+'</text>';
   });
   return svg+'</svg>';
 }
 function rpSemTable(sem,r){
-  const st=semStat(sem);
+  const st=semStatR(sem,r);
   const rows=sem.courses.filter(c=>c.name||c.grade||c.credits!=="").map(c=>{
     const cr=num(c.credits), has=GP.hasOwnProperty(c.grade);
     let note="Counted", cls="";
@@ -786,7 +789,7 @@ function buildReport(s,r){
   const tier=has?(c>=3.8?3:c>=3.65?2:c>=3.5?1:0):0;
   const tierRows=[[3,"Summa Cum Laude","3.80 – 4.00",RPC.green],[2,"Magna Cum Laude","3.65 – 3.79",RPC.amber],[1,"Cum Laude","3.50 – 3.64",RPC.blue]]
     .map(t=>'<div class="rp-tier'+(tier===t[0]?' on':'')+'"><span><i class="rp-sw" style="background:'+t[3]+'"></i>'+t[1]+'</span><span>'+t[2]+'</span></div>').join("");
-  const semRows=s.semesters.map(m=>{const st=semStat(m);return {name:m.name||"Semester",gpa:st.gpa,cr:st.cr};}).filter(x=>x.cr>0);
+  const semRows=s.semesters.map(m=>{const st=semStatR(m,r);return {name:m.name||"Semester",gpa:st.gpa,cr:st.cr};}).filter(x=>x.cr>0);
   /* CGPA after each semester (earlier record first, if entered) */
   const labels=[], vals=[];
   if(num(s.prevCredits)>0&&num(s.prevCgpa)>0){labels.push("Earlier record");vals.push(Math.min(num(s.prevCgpa),4));}
@@ -796,6 +799,7 @@ function buildReport(s,r){
   });
   const prog=vals.length>=2?'<div class="rp-card rp-full"><h2>CGPA after each semester</h2>'+rpLine(labels,vals,true)+'<p class="rp-note">Retakes within semesters are applied as they appear; the last point is your overall CGPA.</p></div>':'';
 
+  const tgraph=semRows.length>=2?'<div class="rp-card rp-full"><h2>GPA in each semester</h2>'+rpLine(semRows.map(x=>x.name),semRows.map(x=>x.gpa),false,{color:"#00a86b",fill:"rgba(0,184,107,.12)",ref:has?{v:r.cgpa,label:"Overall "+r.cgpa.toFixed(2)}:null})+'<p class="rp-note">Semester GPA (TGPA): only the grades earned in that semester; a retaken attempt that is not counted is left out. The dashed line is your overall CGPA.</p></div>':'';
   let h='<div class="rp-head"><div class="rp-brand"><span class="rp-logo">GA</span><div><b>Grade Analyzer</b><small>CGPA report</small></div></div><div class="rp-meta"><b>'+esc(s.name)+'</b><small>'+esc(dateStr)+'</small></div></div>';
   h+='<div class="rp-grid">'+
     '<div class="rp-card"><h2>Overall CGPA</h2><div class="rp-gauge">'+rpGauge(r.cgpa,has)+'</div><div class="rp-stats">'+
@@ -806,10 +810,9 @@ function buildReport(s,r){
     '<div class="rp-card"><h2>Distinction</h2>'+rpHonorBar(c,has)+'<div class="rp-tiers">'+tierRows+'</div><p class="rp-note">'+esc($("honMsg").textContent)+'</p></div>'+
     '<div class="rp-card"><h2>Grade distribution</h2>'+rpPie(r.counted.map(a=>a.c.grade))+'</div>'+
     '<div class="rp-card"><h2>GPA by semester</h2>'+rpSemBars(semRows)+'</div>'+
-  '</div>'+prog;
+  '</div>'+prog+tgraph;
 
   /* details */
-  h+='<div class="rp-break"></div>';
   if(num(s.prevCredits)>0||num(s.prevCgpa)>0) h+='<div class="rp-card"><h2>Your record so far</h2><p class="rp-line"><b>'+r2(num(s.prevCredits))+'</b> credits at a CGPA of <b>'+Math.min(num(s.prevCgpa),4).toFixed(2)+'</b> before the semesters below.</p></div>';
   h+='<div class="rp-card rp-flow"><h2>Semesters &amp; courses</h2>'+(s.semesters.length?s.semesters.map(m=>rpSemTable(m,r)).join(""):'<div class="rp-empty">No semesters entered.</div>')+'</div>';
 
