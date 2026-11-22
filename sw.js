@@ -1,9 +1,14 @@
 // Network-first service worker: always tries the latest files, falls back to cache when offline.
-const CACHE = "grade-analyzer-v8";
+const CACHE = "grade-analyzer-v9";
 const FILES = ["./", "./index.html", "./manifest.webmanifest"];
+const OPTIONAL = ["./pdfjs.js", "./pdfjs.worker.js"]; // PDF import reader; cached for offline use when present
 
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(
+    caches.open(CACHE)
+      .then((c) => c.addAll(FILES).then(() => Promise.all(OPTIONAL.map((u) => c.add(u).catch(() => {})))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", (e) => {
@@ -19,8 +24,7 @@ self.addEventListener("fetch", (e) => {
   e.respondWith(
     fetch(e.request)
       .then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy));
+        if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
         return res;
       })
       .catch(() => caches.match(e.request).then((r) => r || caches.match("./index.html")))

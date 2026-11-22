@@ -174,6 +174,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
 #report .pl{display:grid;gap:4px}#report .pr{font-size:11px;padding:5px 8px}
 #report .wi{grid-template-columns:repeat(7,1fr);gap:5px}
 @media print{body.rpt .topbar,body.rpt .wrap,body.rpt footer,body.rpt .toast{display:none!important}body.rpt #report{display:block}body.rpt{background:#fff;min-height:0}}
+.hbtns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 </style>
 </head>
 <body>
@@ -241,7 +242,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
     </section>
 
     <section class="card">
-      <div class="hdr"><h2>Semesters &amp; courses</h2><button class="btn primary" id="addSem">+ Add semester</button></div>
+      <div class="hdr"><h2>Semesters &amp; courses</h2><div class="hbtns"><button class="btn" id="importPdf">Import from PDF</button><button class="btn primary" id="addSem">+ Add semester</button></div></div>
+      <input type="file" id="pdfFile" accept="application/pdf,.pdf" hidden>
       <p class="note">Name each block (for example Spring 2025) and enter its courses. Entered a course code in more than one semester? That is a retake: the better grade counts and its credits count once. Untick a course to leave it out.</p>
       <div id="semesters"></div>
     </section>
@@ -848,6 +850,78 @@ function exportPdf(){
 }
 
 $("pdfBtn").onclick=exportPdf;
+/* ---------- PDF transcript import ---------- */
+function parseTranscript(raw){
+  const t=String(raw||"").replace(/\s+/g," ");
+  const GR="A-?|B[+-]?|C[+-]?|D[+-]?|F|W|I|P|NP|S|U|X|AU|T";
+  const startRe=/\b([A-Z]{2,4}\s?\d{3}[A-Z]?)\s+(\d{1,3})\s+([A-Za-z][A-Za-z0-9]{1,7})\s+(\d(?:\.\d{1,2})?)(?=\s)/g;
+  const gradeRe=new RegExp("(?:^|\\s)("+GR+")\\s+(\\d+\\.\\d\\d)\\s+(\\d+\\.\\d\\d)(?=\\s|$)");
+  const markRe=/Semester Credit\s*:?\s*(\d+(?:\.\d+)?)\s*TGPA\s*:?\s*(\d+(?:\.\d+)?)\s*CGPA\s*:?\s*(\d+(?:\.\d+)?)/gi;
+  const blocks=[]; let last=0, m;
+  while((m=markRe.exec(t))){blocks.push({text:t.slice(last,m.index),sc:+m[1],tgpa:+m[2],cgpa:+m[3]});last=m.index+m[0].length;}
+  if(last<t.length) blocks.push({text:t.slice(last),sc:null,tgpa:null,cgpa:null}); /* last semester without a summary line */
+  const out={semesters:[],warnings:[],pdfCgpa:null,pdfCredits:null,student:""};
+  const head=t.match(/Student Name Credit Completed CGPA (.+?) (\d+\.\d\d) (\d(?:\.\d+)?)\b/);
+  if(head){out.student=head[1];out.pdfCredits=+head[2];out.pdfCgpa=+head[3];}
+  blocks.forEach(b=>{
+    const starts=[]; startRe.lastIndex=0; let s;
+    while((s=startRe.exec(b.text))) starts.push({i:s.index,e:s.index+s[0].length,code:s[1].replace(/\s/g,""),credit:s[4]});
+    if(!starts.length) return;
+    const lab=b.text.match(/\b(Spring|Summer|Fall|Autumn|Winter)\s+(20\d\d)\b/);
+    const courses=[];
+    starts.forEach((st,k)=>{
+      const seg=b.text.slice(st.e,k+1<starts.length?starts[k+1].i:b.text.length);
+      const g=gradeRe.exec(seg);
+      courses.push({code:st.code,credits:String(parseFloat(st.credit)),grade:g?g[1]:"",count:g?+g[2]:null});
+    });
+    let cr=0,pts=0;
+    courses.forEach(c=>{const gp={"A":4,"A-":3.7,"B+":3.3,"B":3,"B-":2.7,"C+":2.3,"C":2,"C-":1.7,"D+":1.3,"D":1,"F":0}[c.grade];if(gp!==undefined&&c.count>0){cr+=c.count;pts+=c.count*gp;}});
+    const name=lab?lab[1]+" "+lab[2]:"Semester "+(out.semesters.length+1);
+    if(b.tgpa!=null&&cr>0&&Math.abs(pts/cr-b.tgpa)>0.011) out.warnings.push(name+": courses read give a GPA of "+(pts/cr).toFixed(2)+" but the PDF says "+b.tgpa.toFixed(2));
+    courses.forEach(c=>{delete c.count;});
+    out.semesters.push({name:name,courses:courses});
+  });
+  return out;
+}
+
+let pdfLibP=null;
+function loadPdfLib(){
+  if(!pdfLibP) pdfLibP=import("./pdfjs.js").then(m=>{m.GlobalWorkerOptions.workerSrc=new URL("./pdfjs.worker.js",location.href).href;return m;}).catch(e=>{pdfLibP=null;throw e;});
+  return pdfLibP;
+}
+async function pdfToText(lib,file){
+  const doc=await lib.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise, parts=[];
+  for(let p=1;p<=doc.numPages;p++){const pg=await doc.getPage(p),tc=await pg.getTextContent();parts.push(tc.items.map(i=>i.str).join(" "));}
+  return parts.join(" ");
+}
+async function importTranscript(file){
+  let lib;
+  try{lib=await loadPdfLib();}catch(e){toast("PDF reader not found: put pdfjs.js and pdfjs.worker.js next to index.html (needs https or localhost)");return;}
+  let res;
+  try{res=parseTranscript(await pdfToText(lib,file));}catch(e){toast("Could not read that PDF");return;}
+  if(!res.semesters.length){toast("No semesters with grades found in this PDF");return;}
+  const sems=res.semesters.map(x=>({id:uid(),name:x.name.slice(0,60),courses:x.courses.map(c=>({id:uid(),name:c.code,credits:c.credits,grade:gOK(c.grade),off:false}))}));
+  const cur=sheet(), prevActive=state.activeId;
+  const blank=!num(cur.prevCredits)&&!num(cur.prevCgpa)&&!cur.retakes.length&&cur.semesters.every(m=>m.courses.every(c=>!c.name&&!c.grade));
+  let undo;
+  if(blank){
+    const old=cur.semesters; cur.semesters=sems;
+    undo=()=>{cur.semesters=old;persist();if(sheet()===cur)renderAll();};
+  }else{
+    let nm="Imported from PDF",k=2; while(state.sheets.some(x=>x.name===nm)) nm="Imported from PDF "+(k++);
+    const ns=newSheet(nm); ns.semesters=sems; state.sheets.push(ns); state.activeId=ns.id;
+    undo=()=>{state.sheets=state.sheets.filter(x=>x.id!==ns.id);state.activeId=state.sheets.some(x=>x.id===prevActive)?prevActive:state.sheets[0].id;persist();renderAll();};
+  }
+  persist(); renderAll();
+  const r=analyze(sheet()), n=sems.reduce((a,m)=>a+m.courses.length,0);
+  let msg="Imported "+sems.length+" semesters, "+n+" courses";
+  if(res.pdfCgpa!=null) msg+=Math.abs(r.cgpa-res.pdfCgpa)<=0.006?" · CGPA "+r.cgpa.toFixed(2)+" matches the PDF":" · CGPA "+r.cgpa.toFixed(2)+" vs "+res.pdfCgpa.toFixed(2)+" in the PDF, please check";
+  if(res.warnings.length) msg+=" · check: "+res.warnings[0];
+  toast(msg,undo);
+}
+$("importPdf").onclick=()=>$("pdfFile").click();
+$("pdfFile").onchange=function(){const f=this.files[0];this.value="";if(f)importTranscript(f);};
+
 $("printBtn").onclick=()=>{document.body.classList.remove("rpt");window.print();};
 
 /* backup / sync */
