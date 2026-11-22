@@ -165,7 +165,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding-bottom:30px}
 .rp-t tr{break-inside:avoid}.rp-t .num{text-align:right}
 .rp-t tr.mut td{color:#8a9791}.rp-t tr.warn td{color:#9a5b00}
 .rp-lg{width:auto;flex:1}.rp-lg td{border:0;padding:2px 5px;font-size:11.5px}
-.rp-sem{margin-top:12px}.rp-sem:first-of-type{margin-top:0}
+.rp-sem{margin-top:12px;break-inside:avoid}
+.rp-sem .rp-t{table-layout:fixed}
+.rp-sem .rp-t th:nth-child(1){width:20%}.rp-sem .rp-t th:nth-child(2){width:9%}.rp-sem .rp-t th:nth-child(3){width:11%}.rp-sem .rp-t th:nth-child(4){width:10%}.rp-sem .rp-t th:nth-child(5){width:11%}.rp-sem .rp-t th:nth-child(6){width:39%}
+.rp-sem .rp-t td{overflow:hidden}.rp-sem:first-of-type{margin-top:0}
 .rp-sem h3{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 4px;font-size:13px;border-left:4px solid #00a86b;padding-left:8px;break-after:avoid}
 .rp-sem h3 small{font-size:10.5px;font-weight:400;color:#5a6661}
 .rp-break{break-after:page;height:0}
