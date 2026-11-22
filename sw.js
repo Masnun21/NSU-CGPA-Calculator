@@ -1,5 +1,5 @@
 // Network-first service worker: always tries the latest files, falls back to cache when offline.
-const CACHE = "grade-analyzer-v9";
+const CACHE = "grade-analyzer-v10";
 const FILES = ["./", "./index.html", "./manifest.webmanifest"];
 const OPTIONAL = ["./pdfjs.js", "./pdfjs.worker.js"]; // PDF import reader; cached for offline use when present
 
